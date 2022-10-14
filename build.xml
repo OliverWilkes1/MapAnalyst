@@ -66,7 +66,7 @@
     nbproject/build-impl.xml file. 
 
     -->
-    
+    <!--
     <taskdef name="macbundleapp"
              classname="com.oracle.appbundler.AppBundlerTask"   
              classpath="mac/appbundler-1.0.jar" />
@@ -91,7 +91,7 @@
             <zipfileset filemode="755" dir="mac/MapAnalyst.app" prefix="MapAnalyst.app" />
         </zip>
     </target>
-        
+        -->
     <target name="-post-jar">
 
         <!-- Combine all jar files into a single jar. -->

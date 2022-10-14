@@ -47,7 +47,7 @@ public final class Manager implements Serializable {
 
     private transient Projection projection = new TCEAProjection(); // FIXME transient
     private transient boolean automaticCentralLongitude = true; // FIXME transient
-
+   
     /**
      * Constructs a new manager.
      */
@@ -1081,5 +1081,7 @@ public final class Manager implements Serializable {
     public void setAutomaticCentralLongitude(boolean automaticCentralLongitude) {
         this.automaticCentralLongitude = automaticCentralLongitude;
     }
-
 }
+       
+
+

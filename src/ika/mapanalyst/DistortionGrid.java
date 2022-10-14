@@ -93,6 +93,21 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      * vertical offset of grid. Added in MapAnalyst 1.3.12
      */
     private double offsetY;
+    
+     /**
+     * Whether to use the user-defined custom extents or not. Added in October 2022
+     */
+    private boolean useCustomExtents;
+    
+     /**
+     * The optional custom extents for the geographic grid. Added in October 2022
+     */
+    private double customMinLat;
+    private double customMaxLat;
+    private double customMinLon;
+    private double customMaxLon;
+
+    
 
     public DistortionGrid() {
         this.meshSize = 5000;
@@ -353,10 +368,19 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             // create a lon/lat grid in the old map
             // the source points are in OSM, convert them to spherical coordinates in degrees
             double[][] geographicSrcPts = params.getProjector().intermediate2geo(params.getSrcPoints());
-
+            Rectangle2D box;
+            
+            if (useCustomExtents){
+            //if the user has specified custom extents for the new map, use these
+                
+             box = getCustomExtentsBoundingBox();
+            }
+            else {
+            //otherwise, autocalculate them                
             // generate graticule (grid of longitude / latitude lines)
-            Rectangle2D box = Manager.findBoundingBox(geographicSrcPts);
-
+            box = Manager.findBoundingBox(geographicSrcPts);
+            }
+            
             if (box.getMinY() < OpenStreetMap.MIN_LAT) {
                 double x = box.getMinX();
                 double y = OpenStreetMap.MIN_LAT;
@@ -1292,5 +1316,39 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     public void setShowUndistorted(boolean showUndistorted) {
         this.showUndistorted = showUndistorted;
     }
-
+    
+    public void setCustomExtents(double minLat, double minLon, double maxLat, double maxLon){
+    customMinLat = minLat;
+    customMinLon = minLon;
+    customMaxLat = maxLat;
+    customMaxLon = maxLon;
+    }
+    
+     public void setCustomExtentsMode(boolean b){
+    useCustomExtents = b;
+    }
+    
+    public boolean getUsingCustomExtents(){
+    return useCustomExtents;
+    }
+    
+    public double getCustomMinLat(){
+    return customMinLat;
+    }
+    
+    public double getCustomMinLon(){
+    return customMinLon;
+    }
+     
+    public double getCustomMaxLat(){
+    return customMaxLat;
+    }
+      
+     public double getCustomMaxLon(){
+    return customMaxLon;
+    }
+       
+    public Rectangle2D getCustomExtentsBoundingBox() {
+    return new Rectangle2D.Double(customMinLon, customMinLat, customMaxLon - customMinLon, customMaxLat - customMinLat);
+    }
 }

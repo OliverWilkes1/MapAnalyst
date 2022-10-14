@@ -586,6 +586,20 @@ public class MainWindow extends javax.swing.JFrame
         distortionGridOffsetXFormattedTextField = new javax.swing.JFormattedTextField();
         distortionGridOffsetYFormattedTextField = new javax.swing.JFormattedTextField();
         javax.swing.JTextArea gridPositionTextArea = new javax.swing.JTextArea();
+        customExtentsPanel = new javax.swing.JPanel();
+        if (ika.utils.Sys.isMacOSX_10_5_orHigherWithJava5())
+        positionPanel.setOpaque(false);
+        javax.swing.JTextArea customExtentsTextArea = new javax.swing.JTextArea();
+        useTheseExtentsCheckBox = new javax.swing.JCheckBox();
+        jPanel2 = new javax.swing.JPanel();
+        javax.swing.JLabel minLatitudeLabel = new javax.swing.JLabel();
+        minLatitudeFormattedTextField = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel maxLatitudeLabel = new javax.swing.JLabel();
+        maxLatitudeFormattedTextField = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel minLongitudeLabel = new javax.swing.JLabel();
+        minLongitudeFormattedTextField = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel maxLongitudeLabel = new javax.swing.JLabel();
+        maxLongitudeFormattedTextField = new javax.swing.JFormattedTextField();
         pointTablePanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         pointsTable = new javax.swing.JTable();
@@ -1245,6 +1259,118 @@ public class MainWindow extends javax.swing.JFrame
 
         jTabbedPane1.addTab("Offset", positionPanel);
 
+        customExtentsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        customExtentsTextArea.setEditable(false);
+        customExtentsTextArea.setColumns(20);
+        customExtentsTextArea.setFont(new java.awt.Font("SansSerif", 0, 11)); // NOI18N
+        customExtentsTextArea.setLineWrap(true);
+        customExtentsTextArea.setRows(11);
+        customExtentsTextArea.setText("If you'd like to set a custom geographical rectangle on which to operate, you may define it here.\n\n(Note - you must be using degrees as your mesh units for this to apply.)");
+        customExtentsTextArea.setWrapStyleWord(true);
+        customExtentsTextArea.setOpaque(false);
+        customExtentsTextArea.setPreferredSize(new java.awt.Dimension(400, 154));
+
+        useTheseExtentsCheckBox.setLabel("Use these extents");
+        useTheseExtentsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                useTheseExtentsCheckBoxActionPerformed(evt);
+            }
+        });
+
+        jPanel2.setLayout(new java.awt.GridLayout(2, 0));
+
+        minLatitudeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        minLatitudeLabel.setText("Min. latitude");
+        jPanel2.add(minLatitudeLabel);
+        minLatitudeLabel.getAccessibleContext().setAccessibleName("Min lat");
+
+        minLatitudeFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        minLatitudeFormattedTextField.setPreferredSize(new java.awt.Dimension(200, 28));
+        minLatitudeFormattedTextField.setValue(new Double(0));
+        minLatitudeFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                minLatitudeFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(minLatitudeFormattedTextField);
+
+        maxLatitudeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        maxLatitudeLabel.setText("Max. latitude");
+        jPanel2.add(maxLatitudeLabel);
+        maxLatitudeLabel.getAccessibleContext().setAccessibleName("SW Corner");
+
+        maxLatitudeFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        maxLatitudeFormattedTextField.setPreferredSize(new java.awt.Dimension(200, 28));
+        maxLatitudeFormattedTextField.setValue(new Double(0));
+        maxLatitudeFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maxLatitudeFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(maxLatitudeFormattedTextField);
+
+        minLongitudeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        minLongitudeLabel.setText("Min. longitude");
+        minLongitudeLabel.setToolTipText("");
+        jPanel2.add(minLongitudeLabel);
+
+        minLongitudeFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        minLongitudeFormattedTextField.setPreferredSize(new java.awt.Dimension(200, 28));
+        minLongitudeFormattedTextField.setValue(new Double(0));
+        minLongitudeFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                minLongitudeFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(minLongitudeFormattedTextField);
+
+        maxLongitudeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        maxLongitudeLabel.setText("Max. longitude");
+        jPanel2.add(maxLongitudeLabel);
+
+        maxLongitudeFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        maxLongitudeFormattedTextField.setPreferredSize(new java.awt.Dimension(200, 28));
+        maxLongitudeFormattedTextField.setValue(new Double(0));
+        maxLongitudeFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maxLongitudeFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(maxLongitudeFormattedTextField);
+
+        javax.swing.GroupLayout customExtentsPanelLayout = new javax.swing.GroupLayout(customExtentsPanel);
+        customExtentsPanel.setLayout(customExtentsPanelLayout);
+        customExtentsPanelLayout.setHorizontalGroup(
+            customExtentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(customExtentsPanelLayout.createSequentialGroup()
+                .addGroup(customExtentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(customExtentsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 487, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(customExtentsPanelLayout.createSequentialGroup()
+                        .addGap(170, 170, 170)
+                        .addComponent(useTheseExtentsCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, customExtentsPanelLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(customExtentsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(49, 49, 49))
+        );
+        customExtentsPanelLayout.setVerticalGroup(
+            customExtentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(customExtentsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(useTheseExtentsCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(customExtentsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        jTabbedPane1.addTab("Custom extents", customExtentsPanel);
+
         gridOptionsPanel.add(jTabbedPane1, java.awt.BorderLayout.CENTER);
 
         pointTablePanel.setLayout(new java.awt.BorderLayout());
@@ -1485,7 +1611,6 @@ public class MainWindow extends javax.swing.JFrame
             }
         });
 
-        splitPane.setBorder(null);
         splitPane.setResizeWeight(0.5);
 
         oldMapPanel.setLayout(new java.awt.BorderLayout());
@@ -1591,7 +1716,6 @@ public class MainWindow extends javax.swing.JFrame
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/ZoomIn16x16.gif"))); // NOI18N
         zoomInToggleButton.setSelected(true);
         zoomInToggleButton.setToolTipText("Zoom In (Press Cmd or Ctrl for quick access.)");
-        zoomInToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         zoomInToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 zoomInToggleButtonActionPerformed(evt);
@@ -1602,7 +1726,6 @@ public class MainWindow extends javax.swing.JFrame
         toolBarButtonGroup.add(zoomOutToggleButton);
         zoomOutToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/ZoomOut16x16.gif"))); // NOI18N
         zoomOutToggleButton.setToolTipText("Zoom Out (Press Alt+Cmd  or Alt+Ctrl for quick access.)");
-        zoomOutToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         zoomOutToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 zoomOutToggleButtonActionPerformed(evt);
@@ -1613,7 +1736,6 @@ public class MainWindow extends javax.swing.JFrame
         toolBarButtonGroup.add(handToggleButton);
         handToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/Hand16x16.gif"))); // NOI18N
         handToggleButton.setToolTipText("Pan (Press space key for quick access.)");
-        handToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         handToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 handToggleButtonActionPerformed(evt);
@@ -1624,7 +1746,6 @@ public class MainWindow extends javax.swing.JFrame
         toolBarButtonGroup.add(distanceToggleButton);
         distanceToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/Ruler16x16.gif"))); // NOI18N
         distanceToggleButton.setToolTipText("Measure Distance and Angle");
-        distanceToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         distanceToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 distanceToggleButtonActionPerformed(evt);
@@ -1635,7 +1756,6 @@ public class MainWindow extends javax.swing.JFrame
         toolBarButtonGroup.add(penToggleButton);
         penToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/Pen16x16.gif"))); // NOI18N
         penToggleButton.setToolTipText("Draw Polygons. Double-click to close a polygon.");
-        penToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         penToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 penToggleButtonActionPerformed(evt);
@@ -5237,6 +5357,56 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             this.distortionGridOffsetYFormattedTextField.setValue(new Double(1));
         }
         distGrid.setOffsetY(offsetY);
+        
+        //custom extents boolean
+        distGrid.setCustomExtentsMode(useTheseExtentsCheckBox.isSelected());
+        
+         // custom extents
+        double customMinLat;
+        try {
+            minLatitudeFormattedTextField.commitEdit();
+            Object v = minLatitudeFormattedTextField.getValue();
+            customMinLat = ((Number) v).doubleValue();
+        } catch (Exception e) {
+            // reset to default value if the user entered an invalid number
+            customMinLat = 0.0;;
+        }
+        
+        double customMinLon;
+        try {
+            minLongitudeFormattedTextField.commitEdit();
+            Object v = minLongitudeFormattedTextField.getValue();
+            customMinLon = ((Number) v).doubleValue();
+        } catch (Exception e) {
+            // reset to default value if the user entered an invalid number
+            customMinLon = 0.0;
+        }
+        
+        double customMaxLat;
+        try {
+            maxLatitudeFormattedTextField.commitEdit();
+            Object v = maxLatitudeFormattedTextField.getValue();
+            customMaxLat = ((Number) v).doubleValue();
+        } catch (Exception e) {
+            // reset to default value if the user entered an invalid number
+            customMaxLat = 0.0;;
+        }
+        
+        double customMaxLon;
+        try {
+            maxLongitudeFormattedTextField.commitEdit();
+            Object v = maxLongitudeFormattedTextField.getValue();
+            customMaxLon = ((Number) v).doubleValue();
+        } catch (Exception e) {
+            // reset to default value if the user entered an invalid number
+            customMaxLon = 0.0;
+        }
+    
+         distGrid.setCustomExtents(customMinLat,
+                                  customMinLon,
+                                  customMaxLat,
+                                  customMaxLon);
+        
 
         // show undistorted grid
         distGrid.setShowUndistorted(distortionGridShowUndistortedCheckBox.isSelected());
@@ -5319,6 +5489,18 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             double dy = distGrid.getOffsetY();
             this.distortionGridOffsetYFormattedTextField.setValue(dy);
 
+             // custom extents
+            double minLat = distGrid.getCustomMinLat();
+            this.minLatitudeFormattedTextField.setValue(minLat);
+            double maxLat = distGrid.getCustomMaxLat();
+            this.maxLatitudeFormattedTextField.setValue(maxLat);
+            
+             double minLon = distGrid.getCustomMinLon();
+            this.minLongitudeFormattedTextField.setValue(minLon);
+            double maxLon = distGrid.getCustomMaxLon();
+            this.maxLongitudeFormattedTextField.setValue(maxLon);
+
+            
             // show undistorted grid
             this.distortionGridShowUndistortedCheckBox.setSelected(distGrid.isShowUndistorted());
         } finally {
@@ -6637,6 +6819,42 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_distortionGridUncertaintyQuantileSliderStateChanged
 
+    private void useTheseExtentsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useTheseExtentsCheckBoxActionPerformed
+        readDistortionGridFromGUI();
+        clearTemporaryGUI();
+    }//GEN-LAST:event_useTheseExtentsCheckBoxActionPerformed
+
+    private void minLatitudeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minLatitudeFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            this.readDistortionGridFromGUI();
+            clearTemporaryGUI();
+        }
+    }//GEN-LAST:event_minLatitudeFormattedTextFieldPropertyChange
+
+    private void minLongitudeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minLongitudeFormattedTextFieldPropertyChange
+      if ("value".equals(evt.getPropertyName())) {
+            this.readDistortionGridFromGUI();
+            clearTemporaryGUI();
+        }
+    }//GEN-LAST:event_minLongitudeFormattedTextFieldPropertyChange
+
+    private void maxLatitudeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxLatitudeFormattedTextFieldPropertyChange
+       if ("value".equals(evt.getPropertyName())) {
+            this.readDistortionGridFromGUI();
+            clearTemporaryGUI();
+        }
+    }//GEN-LAST:event_maxLatitudeFormattedTextFieldPropertyChange
+
+    private void maxLongitudeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxLongitudeFormattedTextFieldPropertyChange
+    if ("value".equals(evt.getPropertyName())) {
+            this.readDistortionGridFromGUI();
+            clearTemporaryGUI();
+        }
+    }//GEN-LAST:event_maxLongitudeFormattedTextFieldPropertyChange
+
+
+    
+    
     private void enableLinkingGUIForSelectedLink(Link link) {
         this.linkToggleButton.setEnabled(true);
         this.linkToggleButton.setSelected(true);
@@ -6861,6 +7079,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem copyMenuItem;
     private javax.swing.JMenuItem correctOSMMisalignmentBugMenuItem;
     private javax.swing.JRadioButton customCentralLongitudeRadioButton;
+    private javax.swing.JPanel customExtentsPanel;
     private javax.swing.JMenuItem cutMenuItem;
     private javax.swing.JMenu debugMenu;
     private javax.swing.JMenuItem deleteMenuItem;
@@ -6982,6 +7201,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator11;
     private javax.swing.JSeparator jSeparator12;
@@ -7013,7 +7233,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private ch.ethz.karto.gui.MapComponent mapComponent;
     private javax.swing.JMenuItem mapSizeMenuItem;
     private javax.swing.JMenu mapsMenu;
+    private javax.swing.JFormattedTextField maxLatitudeFormattedTextField;
+    private javax.swing.JFormattedTextField maxLongitudeFormattedTextField;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JFormattedTextField minLatitudeFormattedTextField;
+    private javax.swing.JFormattedTextField minLongitudeFormattedTextField;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JToolBar navigationToolBar;
     private ika.gui.MapComponent newMapComponent;
@@ -7105,6 +7329,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JPanel uncertaintyPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlinkedPointsColorMenuItem;
+    private javax.swing.JCheckBox useTheseExtentsCheckBox;
     private javax.swing.JCheckBoxMenuItem vEstimatorCheckBoxMenuItem;
     private javax.swing.JLabel vEstimatorELabel;
     private javax.swing.JTextArea vEstimatorETextArea;
