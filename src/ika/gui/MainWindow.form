@@ -1827,14 +1827,29 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="computeMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="showReportMenuItem">
+            <Menu class="javax.swing.JMenu" name="transformationMenu1">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Show Report of Last Computation"/>
+                <Property name="text" type="java.lang.String" value="Last Computation"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showReportMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="showReportMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Show Report of Last Computation"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showReportMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="exportResidualsReportToCSVMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Export residuals report to CSV"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportResidualsReportToCSVMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
             <MenuItem class="javax.swing.JSeparator" name="jSeparator11">
             </MenuItem>
             <Menu class="javax.swing.JMenu" name="transformationMenu">
@@ -1847,7 +1862,6 @@
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="transformationButtonGroup"/>
                     </Property>
-                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="Helmert 4 Parameters"/>
                   </Properties>
                   <Events>

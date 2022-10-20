@@ -733,10 +733,22 @@ public final class Manager implements Serializable {
             report += transformation.getBreakLineForReport();
             report += "Residuals (id, vx [m], vy [m], v [m], * if v > 3 sigma0)" + nl + nl;
             double threshold = 3 * transformation.getSigma0();
-            report += transformation.getResidualsReport(threshold);
+            report += transformation.getResidualsReport(threshold,false,null);
             return report;
         }
         return null;
+    }
+    
+    public String getTransformationCSV(){
+        if (this.transformation != null) {
+                String nl = System.getProperty("line.separator");
+                String report = "";
+                report += "id, vx [m], vy [m], v [m], * if v > 3 sigma0)" + nl;
+                double threshold = 3 * transformation.getSigma0();
+                report += transformation.getResidualsReport(threshold,true, linkManager);
+                return report;
+            }
+            return null;
     }
 
     public boolean isTransformationInitialized() {

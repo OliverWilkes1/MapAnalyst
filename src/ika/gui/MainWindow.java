@@ -830,7 +830,9 @@ public class MainWindow extends javax.swing.JFrame
         correctOSMMisalignmentBugMenuItem = new javax.swing.JMenuItem();
         analysisMenu = new javax.swing.JMenu();
         computeMenuItem = new javax.swing.JMenuItem();
+        transformationMenu1 = new javax.swing.JMenu();
         showReportMenuItem = new javax.swing.JMenuItem();
+        exportResidualsReportToCSVMenuItem = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JSeparator();
         transformationMenu = new javax.swing.JMenu();
         helmertCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -3314,19 +3316,30 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     analysisMenu.add(computeMenuItem);
 
+    transformationMenu1.setText("Last Computation");
+
     showReportMenuItem.setText("Show Report of Last Computation");
     showReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             showReportMenuItemActionPerformed(evt);
         }
     });
-    analysisMenu.add(showReportMenuItem);
+    transformationMenu1.add(showReportMenuItem);
+
+    exportResidualsReportToCSVMenuItem.setText("Export residuals report to CSV");
+    exportResidualsReportToCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            exportResidualsReportToCSVMenuItemActionPerformed(evt);
+        }
+    });
+    transformationMenu1.add(exportResidualsReportToCSVMenuItem);
+
+    analysisMenu.add(transformationMenu1);
     analysisMenu.add(jSeparator11);
 
     transformationMenu.setText("Transformation");
 
     transformationButtonGroup.add(helmertCheckBoxMenuItem);
-    helmertCheckBoxMenuItem.setSelected(true);
     helmertCheckBoxMenuItem.setText("Helmert 4 Parameters");
     helmertCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -5844,6 +5857,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         this.manager.clearGraphics();
         this.setDirty();
     }
+    
+    public void requestCompute(){
+    compute();
+    }
 
     private void compute() {
 
@@ -6852,6 +6869,47 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_maxLongitudeFormattedTextFieldPropertyChange
 
+    private void exportResidualsReportToCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportResidualsReportToCSVMenuItemActionPerformed
+      
+         if (this.transformationReportWin == null) {
+            updateTransformationReportWindow(false);
+            this.transformationReportWin.show();
+            return;
+         }
+         
+         String csv = manager.getTransformationCSV();
+         
+        String fileName = exportFileName("csv");
+        String expPath = FileUtils.askFile(this,
+                "Export transformation report CSV", fileName, false, "txt", null);
+        if (expPath == null) {
+            return; // user canceled
+        }
+         
+         PrintWriter writer = null;
+        try {
+            if (expPath == null) {
+                return;
+            }
+            
+            if (csv == null) {
+                return;
+            }
+            String ext = "csv";
+            expPath = FileUtils.forceFileNameExtension(expPath, ext);
+            writer = new PrintWriter(new BufferedWriter(
+                    new FileWriter(expPath)));
+            writer.print(csv);
+        } 
+        catch (Exception e){
+        }
+        finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }//GEN-LAST:event_exportResidualsReportToCSVMenuItemActionPerformed
+
 
     
     
@@ -7144,6 +7202,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem exportOldUngenerateMenuItem;
     private javax.swing.JMenuItem exportOldWMFMenuItem;
     private javax.swing.JMenu exportPointsMenu;
+    private javax.swing.JMenuItem exportResidualsReportToCSVMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem findLinkMenuItem;
     private ika.gui.GeoObjectInfoPanel geoObjectInfoPanel;
@@ -7326,6 +7385,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JTextArea transformationInfoTextArea;
     private javax.swing.JLabel transformationLabel;
     private javax.swing.JMenu transformationMenu;
+    private javax.swing.JMenu transformationMenu1;
     private javax.swing.JPanel uncertaintyPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlinkedPointsColorMenuItem;

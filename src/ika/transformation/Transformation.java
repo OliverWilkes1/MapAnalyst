@@ -9,6 +9,7 @@ import java.io.*;
 import ika.utils.NumberFormatter;
 import ika.geo.*;
 import java.text.DecimalFormat;
+import ika.mapanalyst.*;
 
 /**
  * Base class for geometric 2D transformations between two sets of points, where
@@ -153,25 +154,38 @@ public abstract class Transformation implements Serializable {
      * value smaller than 0 if this is not required.
      * @return
      */
-    public String getResidualsReport(double threshold) {
+    public String getResidualsReport(double threshold, boolean CSVformat, LinkManager linkManager) {
         String nl = System.getProperty("line.separator");
+        String demarcator = "\t";
+        
+        if (CSVformat){
+            demarcator = ",";
+        }
+        
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < v.length; i++) {
-            str.append(i + 1);
-            str.append("\t");
+            if (CSVformat){
+             str.append(linkManager.getLink(i).getName());
+            } else {
+             str.append(i + 1);
+            }
+            str.append(demarcator);
             str.append(formatPreciseShort(v[i][0]));
-            str.append("\t");
+            str.append(demarcator);
             str.append(formatPreciseShort(v[i][1]));
-            str.append("\t");
+            str.append(demarcator);
             final double d = Math.hypot(v[i][0], v[i][1]);
             str.append(formatPreciseShort(d));
-            if (threshold > 0 && d > threshold) {
-                str.append("\t*");
+            str.append(demarcator);
+            if (threshold > 0 && d > threshold) {                
+                str.append("*");
             }
             str.append(nl);
         }
         return str.toString();
     }
+    
+   
 
     public abstract double getScale();
 
