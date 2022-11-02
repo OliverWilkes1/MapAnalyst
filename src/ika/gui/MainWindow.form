@@ -1827,7 +1827,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="computeMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="transformationMenu1">
+            <Menu class="javax.swing.JMenu" name="lastComputationMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Last Computation"/>
               </Properties>
@@ -1846,6 +1846,14 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportResidualsReportToCSVMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="exportScaleHeatmap">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Export scale heatmap"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportScaleHeatmapActionPerformed"/>
                   </Events>
                 </MenuItem>
               </SubComponents>

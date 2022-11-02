@@ -1093,7 +1093,53 @@ public final class Manager implements Serializable {
     public void setAutomaticCentralLongitude(boolean automaticCentralLongitude) {
         this.automaticCentralLongitude = automaticCentralLongitude;
     }
+    
+     /**
+     * Computes scale and rotation for a point in the old map.
+     *
+     * TODO This is using the Isolines visualization, which is not optimal.
+     *
+     * @param scaleRot array to hold [scale, rotation] values
+     * @param x horizontal coordinate in old map
+     * @param y vertical coordinate in old map
+     * @param mapScale mean scale of the old map
+     * @return
+     */
+    public boolean computeScaleRot(float[] scaleRot,
+            double x, double y, double mapScale, Projector projector) {
+
+        try {
+            final double[][][] oldNewPts = linkManager.getLinkedPointsCopy(projector);
+            if (oldNewPts == null || oldNewPts[0].length < 2) {
+                return false;
+            }
+
+            final double[][] ptsOld = oldNewPts[0];
+            final double[][] ptsNew = oldNewPts[1];
+
+            Isolines isolines = getIsolines();
+            // test if point is inside convex hull around points
+
+            double[][] hull = linkManager.getOldPointsHull();
+            if (!ika.utils.GeometryUtils.pointInPolygon(x, y, hull)) {
+                return false;
+            }
+          
+            Rectangle2D boundsOldMap = linkManager.getOldPointsGeoSet().getBounds2D();
+
+            isolines.computeScaleAndRotation(x, y, ptsNew, ptsOld, boundsOldMap, mapScale, scaleRot);
+        
+            if (Float.isNaN(scaleRot[0]) || Float.isNaN(scaleRot[1])) {
+                return false;
+            }
+
+            // invert the scale
+            scaleRot[0] = 1.f / scaleRot[0];
+            scaleRot[1] = -scaleRot[1];
+
+            return true;
+        } catch (Exception exc) {
+            return false;
+        }
+    }
 }
-       
-
-

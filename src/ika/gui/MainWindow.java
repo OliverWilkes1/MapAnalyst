@@ -33,11 +33,13 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.prefs.Preferences;
+import javax.imageio.ImageIO;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -830,9 +832,10 @@ public class MainWindow extends javax.swing.JFrame
         correctOSMMisalignmentBugMenuItem = new javax.swing.JMenuItem();
         analysisMenu = new javax.swing.JMenu();
         computeMenuItem = new javax.swing.JMenuItem();
-        transformationMenu1 = new javax.swing.JMenu();
+        lastComputationMenu = new javax.swing.JMenu();
         showReportMenuItem = new javax.swing.JMenuItem();
         exportResidualsReportToCSVMenuItem = new javax.swing.JMenuItem();
+        exportScaleHeatmap = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JSeparator();
         transformationMenu = new javax.swing.JMenu();
         helmertCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -3316,7 +3319,7 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     analysisMenu.add(computeMenuItem);
 
-    transformationMenu1.setText("Last Computation");
+    lastComputationMenu.setText("Last Computation");
 
     showReportMenuItem.setText("Show Report of Last Computation");
     showReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3324,7 +3327,7 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
             showReportMenuItemActionPerformed(evt);
         }
     });
-    transformationMenu1.add(showReportMenuItem);
+    lastComputationMenu.add(showReportMenuItem);
 
     exportResidualsReportToCSVMenuItem.setText("Export residuals report to CSV");
     exportResidualsReportToCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3332,9 +3335,17 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
             exportResidualsReportToCSVMenuItemActionPerformed(evt);
         }
     });
-    transformationMenu1.add(exportResidualsReportToCSVMenuItem);
+    lastComputationMenu.add(exportResidualsReportToCSVMenuItem);
 
-    analysisMenu.add(transformationMenu1);
+    exportScaleHeatmap.setText("Export scale heatmap");
+    exportScaleHeatmap.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            exportScaleHeatmapActionPerformed(evt);
+        }
+    });
+    lastComputationMenu.add(exportScaleHeatmap);
+
+    analysisMenu.add(lastComputationMenu);
     analysisMenu.add(jSeparator11);
 
     transformationMenu.setText("Transformation");
@@ -6910,7 +6921,182 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_exportResidualsReportToCSVMenuItemActionPerformed
 
+    private void exportScaleHeatmapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportScaleHeatmapActionPerformed
+    
+        String format = "png";
+        
+        // ask the user for a file to store the image
+        String fileName = exportFileName(format);
+        String path = FileUtils.askFile(this, "Save Local Scale Heatmap Image", fileName, false, format, null);
+        if (path == null) {
+            return; // user canceled
+        }
+        // ask the user for the number of horizontal pixels of the new image.
+        String imageWidthStr = (String) JOptionPane.showInputDialog(this,
+                "Please enter the width of the image in pixel:",
+                "Export To Raster Image",
+                JOptionPane.PLAIN_MESSAGE, null, null, "5000");
+        if (imageWidthStr == null) {
+            return; // user canceled
+        }
+        int imageWidth;
+        try {
+            imageWidth = Integer.parseInt(imageWidthStr);
+        } catch (NumberFormatException exc) {
+            JOptionPane.showMessageDialog(this, "Invalid number of pixels.",
+                    "Invalid Number", JOptionPane.ERROR_MESSAGE, null);
+            return;
+        }
 
+        // write the heatmap to an image
+        try {
+            this.exportHeatmap(imageWidth, manager.getTransformation().getScale(true), path, format);
+        } catch (NumberFormatException exc) {
+            String msg = "An error occured while exporting to a raster image.";
+            String title = "Raster Image Export Error";
+            ErrorDialog.showErrorDialog(msg, title, exc, this);
+        }
+        catch (IOException ioExc){
+            String msg = "An IO error occured while exporting to a raster image.";
+            String title = "Raster Image Export Error";
+            ErrorDialog.showErrorDialog(msg, title, ioExc, this);
+        }
+    }//GEN-LAST:event_exportScaleHeatmapActionPerformed
+
+    private void exportHeatmap( int imageWidth, double mapScale, String path, String format) throws IOException {
+    
+        GeoSet geoSet = manager.getOldGeoSet();
+
+        if (geoSet == null || path == null)
+            throw new IllegalArgumentException();
+        
+        path = FileUtils.forceFileNameExtension(path, format);
+
+        // Create an image to save
+        
+        Rectangle2D bounds;
+
+        bounds = geoSet.getBounds2D(true);
+        
+        final int imageHeight = 
+                (int)Math.ceil(bounds.getHeight() / bounds.getWidth() * imageWidth);
+
+        if (imageWidth > 32000 || imageHeight > 32000) {
+            throw new IOException("The raster image is too large to export.");
+        }
+
+        // Create a buffered image in which to draw
+        BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight,
+                BufferedImage.TYPE_INT_RGB);
+        
+        // Create a graphics context on the buffered image
+        Graphics2D g2d = bufferedImage.createGraphics();
+        
+        // set black background
+        g2d.setColor(Color.black);
+        g2d.fillRect(0, 0, imageWidth, imageHeight);
+        
+        Color minCol = Color.blue;
+        Color midCol = Color.yellow;
+        Color maxCol = Color.red;
+        
+        double maxScale = Double.MIN_VALUE; //set temporarily so that the loop that follows will correct its value
+        double minScale = Double.MAX_VALUE; //set temporarily so that the loop that follows will correct its value    
+        
+        float[] scaleRot = new float[2];
+        double[] xAndYInBoundsOfRect;
+        
+        double[][] matrix = new double[imageHeight][imageWidth];
+        
+        for (int y = 0;  y < imageHeight; y++){
+            for (int x = 0;  x < imageWidth; x++){
+                xAndYInBoundsOfRect = getInBounds(bounds,(double)x/imageWidth,(double)y/imageHeight);
+                 
+                 if ( manager.computeScaleRot(scaleRot, xAndYInBoundsOfRect[0], xAndYInBoundsOfRect[1], mapScale, manager.createProjector())){
+                 double scale = Math.abs(scaleRot[0] - mapScale);
+                 matrix[y][x] = scale;
+                    if (scale > maxScale){
+                    maxScale = scale;
+                    }
+                    if (scale < minScale){
+                    minScale = scale;
+                    }
+                 } else {
+                 matrix[y][x] = Double.MIN_VALUE;
+                 }
+            }
+        }
+        
+        double scaleRange = maxScale - minScale;
+        
+        for (int y = 0;  y < imageHeight; y++){
+            for (int x = 0;  x < imageWidth; x++){
+
+                if (matrix[y][x] != Double.MIN_VALUE)
+                    {
+                    double scale = matrix[y][x];
+
+                    Color outputPixel;
+                    
+                    if (scale - minScale < scaleRange / 2.0){
+                     outputPixel = blendRGB(minCol,midCol, (scale - minScale)/(scaleRange/2.0));
+                    } else {
+                    outputPixel = blendRGB(midCol,maxCol, ((scale - (scaleRange/2.0)) - minScale)/(scaleRange/2.0));
+                    }
+                    
+                    bufferedImage.setRGB(x,(imageHeight-1)-y,outputPixel.getRGB());
+                    }
+            }
+        }
+       
+        ImageIO.write(bufferedImage, format, new File(path));
+    }
+    
+    private Rectangle2D getBoundsFromPairsOfDoubles(double[][] input){
+    
+        double minX = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxY = Double.MIN_VALUE;
+        
+        for (double[] d : input){
+            if (d[0] < minX){
+            minX = d[0];
+            }
+            if (d[0] > maxX){
+            maxX = d[0];
+            }
+            if (d[1] < minY){
+            minY = d[1];
+            }
+            if (d[1] > maxY){
+            maxY = d[1];
+            }
+            }
+        
+        Rectangle2D output = new Rectangle2D.Double();
+        
+        output.setRect(minX, minY, maxX-minX, maxY-minY);
+        
+        return output;
+    }
+    
+    private Color blendRGB(Color c1, Color c2, double step){
+    
+        int r1 = c1.getRed();
+        int g1 = c1.getGreen();
+        int b1 = c1.getBlue();
+        
+        int newR = (int)Math.round(r1 + ((c2.getRed() - r1) * step));
+        int newG = (int)Math.round(g1 + ((c2.getGreen() - g1) * step));
+        int newB = (int)Math.round(b1 + ((c2.getBlue() - b1) * step));
+        
+        return new Color(newR,newG,newB);
+    }
+
+    private double[] getInBounds(Rectangle2D bounds, double fractionX, double fractionY){
+        return new double[] { bounds.getMinX() + (bounds.getWidth() * fractionX), bounds.getMinY() + (bounds.getHeight() * fractionY)};
+    }
     
     
     private void enableLinkingGUIForSelectedLink(Link link) {
@@ -7203,6 +7389,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem exportOldWMFMenuItem;
     private javax.swing.JMenu exportPointsMenu;
     private javax.swing.JMenuItem exportResidualsReportToCSVMenuItem;
+    private javax.swing.JMenuItem exportScaleHeatmap;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem findLinkMenuItem;
     private ika.gui.GeoObjectInfoPanel geoObjectInfoPanel;
@@ -7280,6 +7467,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JMenu lastComputationMenu;
     private javax.swing.JButton linkNameButton;
     private javax.swing.JLabel linkNameLabel;
     private javax.swing.JPanel linkNamePanel;
@@ -7385,7 +7573,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JTextArea transformationInfoTextArea;
     private javax.swing.JLabel transformationLabel;
     private javax.swing.JMenu transformationMenu;
-    private javax.swing.JMenu transformationMenu1;
     private javax.swing.JPanel uncertaintyPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlinkedPointsColorMenuItem;
