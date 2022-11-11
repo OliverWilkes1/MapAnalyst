@@ -71,7 +71,7 @@ public class LinkManager implements GeoSetSelectionChangeListener,
 
         registerAsListener();
     }
-
+    
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
 

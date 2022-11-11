@@ -314,6 +314,39 @@ public class FileUtils {
         }
         return directory + fileName;
     }
+    
+    /**
+     * Ask the user for multiple files using the AWT FileDialog.
+     */
+    private static String[] askMultipleAWTFiles(java.awt.Frame frame, String message,
+            String defaultFile, boolean load) {
+        // use AWT FileDialog on mac
+        final int flag = load ? FileDialog.LOAD : FileDialog.SAVE;
+
+        // build dummy Frame if none is passed as parameter.
+        if (frame == null) {
+            frame = new Frame();
+        }
+
+        FileDialog fd = new FileDialog(frame, message, flag);
+        fd.setFile(defaultFile);
+        fd.setMultipleMode(true);
+        fd.setVisible(true);
+        
+        File[] files = fd.getFiles();
+        String directory = fd.getDirectory();
+        if (files == null || directory == null) {
+            return null;
+        }
+        
+        String[] fileNames = new String[files.length];
+        
+        for (int i = 0; i < fileNames.length; i++){
+        fileNames[i] = files[i].getPath();          //In practice, on windows, I didn't have to prepend the directory string. It may differ on mac, but I can't test it on mac.
+        }
+        
+        return fileNames;
+    }
 
     /**
      * Returns true if the passed file can be written.
@@ -362,6 +395,7 @@ public class FileUtils {
             fc.setFileFilter(filter);
         }
         fc.setDialogTitle(message);
+        
         File selFile;
         // set default file
         try {
@@ -395,6 +429,65 @@ public class FileUtils {
         } while (!load && !askOverwrite(selFile, fc));
 
         return selFile.getPath();
+    }
+    
+    /**
+     * Ask the user for multiple files using the Swing JFileChooser.
+     */
+    private static String[] askMultipleSwingFiles(java.awt.Frame frame, String message,
+            String defaultFile, FileNameExtensionFilter filter, boolean load) {
+
+        // load the directory last visited from the preferences
+        String LAST_USED_DIRECTORY = "last_directory";
+        Preferences prefs = Preferences.userRoot().node(FileUtils.class.getName());
+        String lastDir = prefs.get(LAST_USED_DIRECTORY, new File(".").getAbsolutePath());
+
+        JFileChooser fc = new JFileChooser(lastDir);
+        if (filter != null) {
+            fc.setFileFilter(filter);
+        }
+        fc.setDialogTitle(message);
+        fc.setMultiSelectionEnabled(true);
+        
+        File[] selFiles;
+        // set default file
+        try {
+            File f = new File(new File(defaultFile).getCanonicalPath());
+            fc.setSelectedFile(f);
+        } catch (Exception e) {
+        }
+
+        int result;
+        do {
+            if (load) {
+                // Show open dialog
+                result = fc.showOpenDialog(frame);
+            } else {
+                // Show save dialog
+                result = fc.showSaveDialog(frame);
+            }
+
+            if (result != JFileChooser.APPROVE_OPTION) {
+                return null;
+            }
+
+            selFiles = fc.getSelectedFiles();
+            if (selFiles == null) {
+                return null;
+            }
+
+            // store directory in preferences
+            prefs.put(LAST_USED_DIRECTORY, selFiles[0].getParent());
+
+        } while (!load && !askOverwrite(selFiles[0], fc));
+
+        String[] output = new String[selFiles.length];
+        
+        for(int i = 0; i < output.length; i++){
+        output[i] = selFiles[i].getPath();
+        }
+        
+        return output;
     }
 
     /**
@@ -487,6 +580,22 @@ public class FileUtils {
     public static String askFile(java.awt.Frame frame, String message, boolean load) {
         return FileUtils.askFile(frame, message, null, load, null, null);
     }
+    
+    
+     public static String[] askMultipleFiles(java.awt.Frame frame, String message, boolean load) {
+         String[] filePaths;
+         String defaultFile = null;
+         FileNameExtensionFilter filter = null;
+         
+     if (FileUtils.IS_MAC_OSX) {
+                filePaths = FileUtils.askMultipleAWTFiles(frame, message, defaultFile, load);
+            } else {
+                filePaths = FileUtils.askMultipleSwingFiles(frame, message, defaultFile, filter, load);
+            }
+ 
+     return filePaths;
+     }
+    
 
     public static String askDirectory(java.awt.Frame frame,
             String message,

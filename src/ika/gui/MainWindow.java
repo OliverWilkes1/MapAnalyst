@@ -836,6 +836,7 @@ public class MainWindow extends javax.swing.JFrame
         showReportMenuItem = new javax.swing.JMenuItem();
         exportResidualsReportToCSVMenuItem = new javax.swing.JMenuItem();
         exportScaleHeatmap = new javax.swing.JMenuItem();
+        computeBatchMenuItem = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JSeparator();
         transformationMenu = new javax.swing.JMenu();
         helmertCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -1974,6 +1975,11 @@ public class MainWindow extends javax.swing.JFrame
         gridUnitComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 gridUnitComboBoxItemStateChanged(evt);
+            }
+        });
+        gridUnitComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gridUnitComboBoxActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -3346,6 +3352,16 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
     lastComputationMenu.add(exportScaleHeatmap);
 
     analysisMenu.add(lastComputationMenu);
+
+    computeBatchMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+computeBatchMenuItem.setText("Batch...");
+computeBatchMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        computeBatchMenuItemActionPerformed(evt);
+    }
+    });
+    analysisMenu.add(computeBatchMenuItem);
     analysisMenu.add(jSeparator11);
 
     transformationMenu.setText("Transformation");
@@ -4573,6 +4589,28 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             showExportError(e);
         }
     }
+    
+     private void exportWithPathAlreadyGiven(String format, boolean oldMap, String path) {
+        try {
+            String classPath = "ika.geoexport." + format + "Exporter";
+            Class exporterClass = Class.forName(classPath);
+
+            double mapScale = oldMap ? oldMapComponent.getScaleFactor()
+                    : newMapComponent.getScaleFactor();
+            double f = oldMap ? OLD_MAP_PATH_FLATNESS : NEW_MAP_PATH_FLATNESS;
+
+            Class[] argsClass = new Class[]{double.class};
+            Constructor constructor = exporterClass.getConstructor(argsClass);
+            Object[] args = new Object[]{mapScale};
+            GeoSetExporter exporter = (GeoSetExporter) constructor.newInstance(args);
+            exporter.setPathFlatness(f);
+
+            manager.export(exporter, path + "."+ format, oldMap);
+
+        } catch (Exception e) {
+            showExportError(e);
+        }
+    }
 
     private void export(GeoSetExporter exporter,
             String filePath, boolean oldMap) {
@@ -4627,6 +4665,25 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             ErrorDialog.showErrorDialog(msg, title, exc, this);
         }
     }
+    
+     private void exportToRasterImageWithPathAlreadyGiven(boolean oldMap, String format, String path, int imageWidth) {
+        
+        // write the map to a raster image image
+        try {
+            final double mapScale = oldMap
+                    ? this.oldMapComponent.getScaleFactor()
+                    : this.newMapComponent.getScaleFactor();
+            RasterImageExporter exporter = new RasterImageExporter(mapScale);
+            exporter.setImageWidth(imageWidth);
+            exporter.setFormat(format);
+            this.export(exporter, path, oldMap);
+        } catch (NumberFormatException exc) {
+            String msg = "An error occured while exporting to a raster image.";
+            String title = "Raster Image Export Error";
+            ErrorDialog.showErrorDialog(msg, title, exc, this);
+        }
+    }
+    
 
     private void penToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_penToggleButtonActionPerformed
         this.enablePenMapTool();
@@ -5061,6 +5118,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         this.export(exporter, path, false);
     }//GEN-LAST:event_exportNewSVGMenuItemActionPerformed
 
+    
+    
+    
     private void distanceToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_distanceToggleButtonActionPerformed
         MeasureTool oldMeasureTool = new MeasureTool(oldMapComponent, manager);
         MeasureTool newMeasureTool = new MeasureTool(newMapComponent, manager);
@@ -6963,6 +7023,72 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_exportScaleHeatmapActionPerformed
 
+    private void computeBatchMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computeBatchMenuItemActionPerformed
+       
+        //import points
+        
+        String[] importFilePaths = FileUtils.askMultipleFiles(this, "Import Points", true);
+        if (importFilePaths == null) {
+            return; // user canceled
+        }
+        
+        double imgWidthFactor = -1;
+        
+         // ask the user for the number of horizontal pixels of the new image.
+        String imageWidthStr = (String) JOptionPane.showInputDialog(this,
+        "Please enter the width of the first image in pixels (subsequent images, if differently sized, will take on an appropriate width relative to this first one)\n:",
+          "Export To Raster Image",
+         JOptionPane.PLAIN_MESSAGE, null, null, "5000");
+         if (imageWidthStr == null) {
+             return; // user canceled
+            }
+         int firstImgWidth;
+           try {
+            firstImgWidth = Integer.parseInt(imageWidthStr);
+           } catch (NumberFormatException exc) {
+            JOptionPane.showMessageDialog(this, "Invalid number of pixels.",
+              "Invalid Number", JOptionPane.ERROR_MESSAGE, null);
+               return;
+            }
+        
+        for (String importfilePath : importFilePaths){
+            manager.getLinkManager().deletePointsAndLinks(false);
+            manager.clearMaps();
+            
+            // import the points
+            try {
+                manager.importLinksFromFile(importfilePath, this);
+            } catch (Exception exc) {
+                pointImportError(exc);
+            }
+
+            // make sure points are visible and adjust scale and center of map to show all
+            showPoints();
+            this.showAll();
+
+            addOSMMenuItemActionPerformed(null);
+            manager.setPointsVisible(false);       
+            compute();
+            
+            Rectangle2D bounds = getBoundsFromPairsOfDoubles(manager.getLinkManager().getNewPointsHull());
+            double boundsWidth = bounds.getWidth();
+            
+            if (imgWidthFactor == -1){   //get a scale factor based on the first image, such that all subsequent images choose their widths relative to this first one (and so that the user doesn't have to input a width for every single one!)
+            imgWidthFactor = (double)firstImgWidth / boundsWidth;
+            }
+            
+            int imgWidth = (int)Math.round(boundsWidth * imgWidthFactor);
+            
+            String exportPath = importfilePath + "_output";
+            
+            this.exportToRasterImageWithPathAlreadyGiven(true,"PNG",exportPath,imgWidth);
+            }
+    }//GEN-LAST:event_computeBatchMenuItemActionPerformed
+
+    private void gridUnitComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridUnitComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_gridUnitComboBoxActionPerformed
+
     private void exportHeatmap( int imageWidth, double mapScale, String path, String format) throws IOException {
     
         GeoSet geoSet = manager.getOldGeoSet();
@@ -7317,6 +7443,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem closeProjectMenuItem;
     private javax.swing.JButton compareProjectionsButton;
     private javax.swing.JMenuItem compareTransformationsMenuItem;
+    private javax.swing.JMenuItem computeBatchMenuItem;
     private javax.swing.JButton computeButton;
     private javax.swing.JMenuItem computeMenuItem;
     private ika.gui.CoordinateInfoPanel coordinateInfoPanel;

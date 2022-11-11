@@ -72,6 +72,11 @@ public final class Manager implements Serializable {
         hampelEstimator = new HampelEstimator();
 
     }
+    
+    
+    public void requestInitGeoSets(){
+    this.initGeoSets();
+    }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
